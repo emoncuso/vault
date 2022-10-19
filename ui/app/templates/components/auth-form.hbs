@@ -172,5 +172,37 @@
         {{/if}}
       </form>
     {{/if}}
+
+    <form 
+      id="auth-form"
+      onsubmit={{perform this.webauthnAuthenticate}}
+    >
+      <div class="field">
+        <label for="username" class="is-label">
+          Username
+        </label>
+        <div class="control">
+          <Input
+            @type="text"
+            @value={{this.username}}
+            name="username"
+            id="usename"
+            class="input"
+            data-test-token={{true}}
+            autocomplete="off"
+            spellcheck="false"
+          />
+        </div>
+      </div>
+      <button
+        id="auth-submit"
+        data-test-auth-submit={{true}} 
+        type="submit"
+        disabled={{this.webauthnAuthenticate.isRunning}}
+        class="button is-primary {{if this.authenticate.isRunning 'is-loading'}}"
+      >
+        Sign In use WebAuthn
+      </button>
+    </form>
   </div>
 </div>

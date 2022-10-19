@@ -10,6 +10,8 @@ import { supportedAuthBackends } from 'vault/helpers/supported-auth-backends';
 import { task, timeout } from 'ember-concurrency';
 import { waitFor } from '@ember/test-waiters';
 
+import { bufferDecode, bufferEncode } from '../utils/encode-decode';
+
 const BACKENDS = supportedAuthBackends();
 
 /**
@@ -236,6 +238,70 @@ export default Component.extend(DEFAULTS, {
     })
   ),
 
+  webauthnAuthenticate: task(
+    function*(e) {
+      e.preventDefault();
+
+      const username = this.username;
+      console.log(this.cluster);
+      yield fetch(`/login/begin/${username}`)
+      .then(res => res.json())
+      .then(credentialRequestOptions => {
+        credentialRequestOptions.publicKey.challenge = bufferDecode(credentialRequestOptions.publicKey.challenge);
+        credentialRequestOptions.publicKey.allowCredentials.forEach(function (listItem) {
+          listItem.id = bufferDecode(listItem.id)
+        });
+
+        return navigator.credentials.get({
+          publicKey: credentialRequestOptions.publicKey
+        })
+      })
+      .then((assertion) => {
+        let authData = assertion.response.authenticatorData;
+        let clientDataJSON = assertion.response.clientDataJSON;
+        let rawId = assertion.rawId;
+        let sig = assertion.response.signature;
+        let userHandle = assertion.response.userHandle;
+
+        return fetch(`/login/finish/${username}`, {
+          method: 'POST',
+          body: JSON.stringify({
+            id: assertion.id,
+            rawId: bufferEncode(rawId),
+            type: assertion.type,
+            response: {
+              authenticatorData: bufferEncode(authData),
+              clientDataJSON: bufferEncode(clientDataJSON),
+              signature: bufferEncode(sig),
+              userHandle: bufferEncode(userHandle),
+            }
+          }),
+        });
+      })
+      .then(res => res.json())
+      .then(async (successResponse) => {
+        // there will probably need to be something else here to actually log you in
+        // if what it gives you back is a token, it'll be something like this:
+
+        // const data = { token: 'whatever-the-token-is' } // get this from successResponse?
+        // const backendType = 'token'
+        //
+        // const authResponse = await this.auth.authenticate({
+        //   clusterId: this.cluster.id,
+        //   backend, backendType,
+        //   data,
+        //   selectedAuth: 'token',
+        // });
+        // this.onSuccess(authResponse, backendType, data);
+      })
+      .catch(e => {
+        console.error(e);
+        // 
+      })
+
+    }
+  ),
+
   delayAuthMessageReminder: task(function* () {
     if (Ember.testing) {
       this.showLoading = true;
@@ -283,5 +349,6 @@ export default Component.extend(DEFAULTS, {
         error: e ? this.auth.handleError(e) : null,
       });
     },
+    
   },
 });
