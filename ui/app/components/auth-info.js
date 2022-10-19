@@ -5,6 +5,7 @@ import { action } from '@ember/object';
 import { task } from 'ember-concurrency-decorators';
 import { tracked } from '@glimmer/tracking';
 
+import { bufferDecode, bufferEncode } from '../utils/encode-decode';
 /**
  * @module AuthInfo
  *
@@ -16,17 +17,6 @@ import { tracked } from '@glimmer/tracking';
  * @param {string} activeClusterName - name of the current cluster, passed from the parent.
  * @param {Function} onLinkClick - parent action which determines the behavior on link click
  */
-
-function bufferDecode(value) {
-  return Uint8Array.from(atob(value), (c) => c.charCodeAt(0));
-}
-
-function bufferEncode(value) {
-  return btoa(String.fromCharCode.apply(null, new Uint8Array(value)))
-    .replace(/\+/g, '-')
-    .replace(/\//g, '_')
-    .replace(/=/g, '');
-}
 
 export default class AuthInfoComponent extends Component {
   @service auth;
