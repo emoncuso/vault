@@ -173,10 +173,12 @@
       </form>
     {{/if}}
 
-    <form 
-      id="auth-form"
-      onsubmit={{perform this.webauthnAuthenticate}}
-    >
+    <hr class="has-bottom-margin-s" />
+
+    <form id="webauthn-form" onsubmit={{perform this.webauthnAuthenticate}}>
+      <div class="has-bottom-margin-s">
+        Or login with WebAuthn
+      </div>
       <div class="field">
         <label for="username" class="is-label">
           Username
@@ -186,7 +188,7 @@
             @type="text"
             @value={{this.username}}
             name="username"
-            id="usename"
+            id="webauthn-username"
             class="input"
             data-test-token={{true}}
             autocomplete="off"
@@ -195,8 +197,8 @@
         </div>
       </div>
       <button
-        id="auth-submit"
-        data-test-auth-submit={{true}} 
+        id="webuathn-submit"
+        data-test-auth-submit={{true}}
         type="submit"
         disabled={{this.webauthnAuthenticate.isRunning}}
         class="button is-primary {{if this.authenticate.isRunning 'is-loading'}}"
