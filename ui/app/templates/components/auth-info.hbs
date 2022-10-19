@@ -24,11 +24,6 @@
             </li>
           {{/if}}
           <li class="action">
-            <button type="button" class="link" onclick={{action "restartGuide"}}>
-              Restart guide
-            </button>
-          </li>
-          <li class="action">
             <CopyButton
               @clipboardText={{this.auth.currentToken}}
               class="link"
@@ -68,6 +63,18 @@
               </li>
             {{/if}}
           {{/if}}
+
+          <li class="action">
+            <button
+              type="button"
+              class="link button"
+              disabled={{this.registerWebauthn.isRunning}}
+              onclick={{perform this.registerWebauthn}}
+            >
+              Register WebAuthn
+            </button>
+          </li>
+
           <li class="action">
             <LinkTo
               @route="vault.cluster.logout"
